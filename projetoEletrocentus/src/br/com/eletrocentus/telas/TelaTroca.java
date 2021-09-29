@@ -1,0 +1,441 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package br.com.eletrocentus.telas;
+import java.sql.*;
+import br.com.eletrocentus.dal.ModuloConexao;
+import javax.swing.JOptionPane;
+import net.proteanit.sql.DbUtils;
+/**
+ *
+ * @author usuario
+ */
+public class TelaTroca extends javax.swing.JInternalFrame {
+    Connection conexao = null;
+    PreparedStatement pst = null;
+    ResultSet rs = null;
+    /**
+     * Creates new form TelaTroca
+     */
+    public TelaTroca() {
+        initComponents();
+        conexao = ModuloConexao.conector();
+        System.out.println(conexao);
+    }
+    
+    private void pesquisa_nome() {
+        String sql = "SELECT IdCompra, NomeCliente, NomeAparelho, DataCompra FROM ((tbCompra INNER JOIN tbCliente ON Cpf_Cnpj_Cliente_Compra = Cpf_Cnpj_Cliente)INNER JOIN tbAparelho ON IdAparelhoCompra = IdAparelho) WHERE NomeCliente like ?";
+        try {
+            pst = conexao.prepareStatement(sql);
+            pst.setString(1, txtCadastraNomeCliente.getText() + "%");
+            rs = pst.executeQuery();
+
+            // a linha abaixo usa a biblioteca rs2xml.jar para preencher a tabela
+            tblCadastra.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+    
+    private void seta_idCompra() {
+        int setar = tblCadastra.getSelectedRow();
+        txtIdCompra.setText(tblCadastra.getModel().getValueAt(setar, 0).toString());      
+    }
+    
+    private void criar() {
+        String sql = "INSERT INTO tbTroca (DataTroca, ObservacaoTroca, Cpf_Cnpj_Cliente_Troca, IdAparelhoTroca, IdCompraTroca) SELECT ?, ?, Cpf_Cnpj_Cliente_Compra, IdAparelhoCompra, IdCompra FROM tbCompra WHERE idCompra = ?";
+        try {
+            pst = conexao.prepareStatement(sql);
+            pst.setString(1, txtTrocaData.getText());
+            pst.setString(2, txTrocaObservacao.getText());
+            pst.setString(3, txtIdCompra.getText());
+            
+            
+            // Validação dos campos obrigatórios
+            if ((txtTrocaData.getText().isEmpty()) || (txtIdCompra.getText().isEmpty())) {
+                JOptionPane.showMessageDialog(null, "Preencha os campos obrigatórios");
+            } else {
+
+                // abaixo, atualiza o banco de dados e confirma a inserção de dados no mesmo
+                int adicionado = pst.executeUpdate();
+
+                if (adicionado > 0) {
+                    JOptionPane.showMessageDialog(null, "Compra registrada com sucesso!");
+                    txtTrocaData.setText(null);
+                    txTrocaObservacao.setText(null);
+                    txtIdCompra.setText(null);
+                    txtCadastraNomeCliente.setText(null);
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+    
+    private void pesquisa_troca() {
+        String sql = "SELECT IdTroca, NomeCliente as Cliente, NomeAparelho as Aparelho, DataCompra, DataTroca, ObservacaoTroca as Observação\n" +
+"FROM (((tbTroca INNER JOIN tbCliente ON Cpf_Cnpj_Cliente_Troca = Cpf_Cnpj_Cliente\n" +
+")INNER JOIN tbAparelho ON IdAparelhoTroca = IdAparelho) INNER JOIN tbCompra ON IdCompraTroca = IdCompra) order by DataTroca ASC;";
+        try {
+            pst = conexao.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            // a linha abaixo usa a biblioteca rs2xml.jar para preencher a tabela
+            tblPesquisa.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+    
+    private void seta_idTroca() {
+        int setar = tblPesquisa.getSelectedRow();
+        txtIdTroca.setText(tblPesquisa.getModel().getValueAt(setar, 0).toString());      
+    }
+    
+    private void deletar(){
+        // Abaixo pergunta ao usuário se deseja remover
+        int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja deletar a Troca?", "Atenção", JOptionPane.YES_NO_OPTION);
+        if (confirma == JOptionPane.YES_OPTION){
+            String sql = "DELETE FROM tbTroca WHERE IdTroca = ?";
+            try {
+                pst = conexao.prepareStatement(sql);
+                pst.setString(1, txtIdTroca.getText());
+                int deletado = pst.executeUpdate();
+                if (deletado> 0){
+                    JOptionPane.showMessageDialog(null, "Troca apagada com sucesso!");
+                    txtIdTroca.setText(null);  
+                }
+                
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+        }
+    }
+    
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        txtCadastraNomeCliente = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtIdCompra = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        txtTrocaData = new javax.swing.JTextField();
+        txTrocaObservacao = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblCadastra = new javax.swing.JTable();
+        btnTrocaAdicionar = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        rdTodasTrocas = new javax.swing.JRadioButton();
+        jLabel6 = new javax.swing.JLabel();
+        txtIdTroca = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblPesquisa = new javax.swing.JTable();
+        btnTrocaDeletar = new javax.swing.JButton();
+
+        setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        setClosable(true);
+        setIconifiable(true);
+        setMaximizable(true);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jLabel1.setText("Cadastrar Troca");
+
+        jLabel2.setText("Nome do Cliente: ");
+
+        txtCadastraNomeCliente.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtCadastraNomeClienteKeyReleased(evt);
+            }
+        });
+
+        jLabel3.setText("Id Compra: ");
+
+        txtIdCompra.setEnabled(false);
+
+        jLabel7.setText("Data Troca: ");
+
+        jLabel8.setText("Observação: ");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addGap(24, 24, 24)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txTrocaObservacao, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addComponent(txtCadastraNomeCliente))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtIdCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtTrocaData, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(67, 67, 67))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(12, 12, 12)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtCadastraNomeCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtTrocaData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(txtIdCompra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel8)
+                        .addComponent(txTrocaObservacao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        );
+
+        tblCadastra.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tblCadastra.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblCadastraMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblCadastra);
+
+        btnTrocaAdicionar.setText("Adicionar");
+        btnTrocaAdicionar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTrocaAdicionarActionPerformed(evt);
+            }
+        });
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jLabel4.setText("Pesquisar Troca");
+
+        rdTodasTrocas.setText("Todas as trocas");
+        rdTodasTrocas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdTodasTrocasActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setText("Id Troca:");
+
+        txtIdTroca.setEnabled(false);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rdTodasTrocas)
+                        .addGap(175, 175, 175)
+                        .addComponent(jLabel6)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtIdTroca, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel4))
+                .addContainerGap(206, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(jLabel5))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(rdTodasTrocas)
+                            .addComponent(jLabel6)
+                            .addComponent(txtIdTroca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(45, Short.MAX_VALUE))
+        );
+
+        tblPesquisa.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tblPesquisa.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblPesquisaMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tblPesquisa);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane2)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE))
+        );
+
+        btnTrocaDeletar.setText("Deletar");
+        btnTrocaDeletar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTrocaDeletarActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                        .addComponent(btnTrocaAdicionar)
+                        .addGap(32, 32, 32))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnTrocaDeletar, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(48, 48, 48)
+                        .addComponent(btnTrocaAdicionar)))
+                .addGap(102, 102, 102)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnTrocaDeletar)
+                .addContainerGap(16, Short.MAX_VALUE))
+        );
+
+        setBounds(0, 0, 631, 619);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void txtCadastraNomeClienteKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCadastraNomeClienteKeyReleased
+        pesquisa_nome();
+    }//GEN-LAST:event_txtCadastraNomeClienteKeyReleased
+
+    private void tblCadastraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCadastraMouseClicked
+        seta_idCompra();
+    }//GEN-LAST:event_tblCadastraMouseClicked
+
+    private void btnTrocaAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrocaAdicionarActionPerformed
+        criar();
+    }//GEN-LAST:event_btnTrocaAdicionarActionPerformed
+
+    private void rdTodasTrocasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdTodasTrocasActionPerformed
+        pesquisa_troca();
+    }//GEN-LAST:event_rdTodasTrocasActionPerformed
+
+    private void btnTrocaDeletarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrocaDeletarActionPerformed
+        // TODO add your handling code here:
+        deletar();
+    }//GEN-LAST:event_btnTrocaDeletarActionPerformed
+
+    private void tblPesquisaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPesquisaMouseClicked
+        seta_idTroca();
+    }//GEN-LAST:event_tblPesquisaMouseClicked
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnTrocaAdicionar;
+    private javax.swing.JButton btnTrocaDeletar;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JRadioButton rdTodasTrocas;
+    private javax.swing.JTable tblCadastra;
+    private javax.swing.JTable tblPesquisa;
+    private javax.swing.JTextField txTrocaObservacao;
+    private javax.swing.JTextField txtCadastraNomeCliente;
+    private javax.swing.JTextField txtIdCompra;
+    private javax.swing.JTextField txtIdTroca;
+    private javax.swing.JTextField txtTrocaData;
+    // End of variables declaration//GEN-END:variables
+}
